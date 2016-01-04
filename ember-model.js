@@ -163,7 +163,11 @@ Ember.RecordArray = Ember.ArrayProxy.extend(Ember.Evented, {
   isLoaded: false,
   isLoading: Ember.computed.not('isLoaded'),
 
-  load: function(klass, data) {
+  load: function(klass, data, meta) {
+    if(meta)
+    {
+      set(this, '_meta_', meta);
+    }  
     set(this, 'content', this.materializeData(klass, data));
     this.notifyLoaded();
   },
@@ -1748,7 +1752,10 @@ Ember.RESTAdapter = Ember.Adapter.extend({
     var collectionKey = get(klass, 'collectionKey'),
         dataToLoad = collectionKey ? get(data, collectionKey) : data;
 
-    records.load(klass, dataToLoad);
+    var metaKey = get(klass, 'metaKey'),
+        metaToLoad = metaKey ? get(data, metaKey) : null;
+
+    records.load(klass, dataToLoad, metaToLoad);
   },
 
   findQuery: function(klass, records, params) {
@@ -1764,8 +1771,11 @@ Ember.RESTAdapter = Ember.Adapter.extend({
   didFindQuery: function(klass, records, params, data) {
       var collectionKey = get(klass, 'collectionKey'),
           dataToLoad = collectionKey ? get(data, collectionKey) : data;
+      
+      var metaKey = get(klass, 'metaKey'),
+          metaToLoad = metaKey ? get(data, metaKey) : null;
 
-      records.load(klass, dataToLoad);
+      records.load(klass, dataToLoad, metaToLoad);
   },
 
   createRecord: function(record) {
